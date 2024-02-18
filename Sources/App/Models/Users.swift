@@ -26,10 +26,8 @@ final class Users: Model, Content {
         self.id = id
         self.name = name
         self.DoB = DoB
-        
-    
+
     }
- 
-    
+  
 }
 
