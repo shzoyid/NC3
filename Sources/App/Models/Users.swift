@@ -11,7 +11,7 @@ import Vapor
 final class Users: Model, Content {
     static let schema = "user"
     
-    @ID(key: .id)
+    @ID
     var id: UUID?
     
     @Field(key: "name")
@@ -26,10 +26,8 @@ final class Users: Model, Content {
         self.id = id
         self.name = name
         self.DoB = DoB
-        
-    
+
     }
- 
-    
+  
 }
 
