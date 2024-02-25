@@ -26,16 +26,26 @@ struct AttendenceController: RouteCollection {
         return try await Attendance.query(on:req.db).all()
     }
     //create
+    
     func post(req: Request) async throws -> Attendance {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
         let newAttendance = try req.content.decode(Attendance.self, using: decoder)
-        newAttendance.check_in
         
+        let checkInHour = Calendar.current.component(.hour, from: newAttendance.check_in)
+        let checkInMinute = Calendar.current.component(.minute, from: newAttendance.check_in)
+        let checkOutHour = Calendar.current.component(.hour, from: newAttendance.check_out!)
+        let checkOutMinute = Calendar.current.component(.minute, from: newAttendance.check_out!)
         
-        //
+        if (checkInHour > 2 || (checkInHour == 2 && checkInMinute > 15)) ||
+           (checkOutHour < 6 || (checkOutHour == 6 && checkOutMinute < 00)) {
+            throw Abort(.badRequest, reason: "Invalid check-in or check-out time")
+        }
+        
         try await newAttendance.create(on: req.db)
         return newAttendance
+    }
+    // ...
     }
     
     func update(req: Request) async throws -> Attendance{
@@ -58,6 +68,6 @@ struct AttendenceController: RouteCollection {
         return UserInDB
     }
 
-}
+
 
 
