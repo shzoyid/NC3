@@ -39,7 +39,7 @@ struct AttendenceController: RouteCollection {
         
         if (checkInHour > 2 || (checkInHour == 2 && checkInMinute > 15)) ||
            (checkOutHour < 6 || (checkOutHour == 6 && checkOutMinute < 00)) {
-            throw Abort(.badRequest, reason: "Invalid check-in or check-out time")
+            throw Abort(.badRequest, reason: "late check-in or early check-out time!!!")
         }
         
         try await newAttendance.create(on: req.db)
