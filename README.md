@@ -17,5 +17,5 @@ Feature List:
 - [@Jood Areabi](https://github.com/valguric)
 - [@Yara Altukhaim](https://github.com/yaraaltukhaim)
 
-  <img width="610" alt="Screenshot 2024-02-25 at 4 02 40 PM" src="https://github.com/shzoyid/NC3/assets/116315852/18262259-b838-417f-919b-f981c2ebb738">
+<img width="1109" alt="Screenshot 2024-02-25 at 4 12 12 PM" src="https://github.com/shzoyid/NC3/assets/116315852/dfa8795d-3467-4b88-8bfc-826b10eb998e">
 
