@@ -12,7 +12,6 @@ struct CreateUsers: AsyncMigration {
         try await database.schema("users")
             .id()
             .field("name", .string, .required)
-            .field("DoB", .date, .required)
             .create()
     }
     

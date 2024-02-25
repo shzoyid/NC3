@@ -11,7 +11,10 @@ public func configure(_ app: Application) async throws {
                                     SQLPostgresConfiguration(hostname: "localhost",
                                                              username: "postgres", password: "",
                                                              database: "nc3",
-                                                             tls:.prefer(try .init(configuration: .clientDefault)))),     as: .psql)
-    
+                                                             tls:.prefer(try .init(configuration: .clientDefault)))), as: .psql)
+    app.migrations.add(CreateUsers())
+    app.migrations.add(CreateAbsence())
+    app.migrations.add(CreateAttendance())
+    try await app.autoMigrate()
     try routes(app)
 }

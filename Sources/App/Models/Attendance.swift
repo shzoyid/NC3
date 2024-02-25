@@ -11,7 +11,7 @@ import Vapor
 final class Attendance: Model, Content {
     
     static let schema: String = "attendances"
-    @ID(key: "att_id ")
+    @ID
     var id: UUID?
     @Field(key: "check_in")
     var check_in: Date

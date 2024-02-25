@@ -9,15 +9,16 @@ import Vapor
 
 struct AbsenceController: RouteCollection {
     func boot(routes: Vapor.RoutesBuilder) throws {
-            
-            let Absence = routes.grouped("absence")
-            
-            Absence.post(use: create)
-            Absence.get(use: read)
-            Absence.put(use: update)
-            //http://127.0.0.1:8080/attendence/1234567890
-            Absence.delete(":id", use: delete)
-        }
+        
+        let absences = routes.grouped("absences")
+        
+        absences.post(use: create)
+        absences.get(use: read)
+        absences.put(use: update)
+        //http://127.0.0.1:8080/attendence/1234567890
+        absences.delete(":id", use: delete)
+    }
+    
         //create
         func create(req: Request) async throws -> String{
             return "new absence record added"

@@ -10,34 +10,23 @@ import Vapor
 
 struct UserController: RouteCollection {
     func boot(routes: Vapor.RoutesBuilder) throws {
-        //http://127.0.0.1:8080/users
         let users = routes.grouped("users")
-        
-        users.post(use: create)
-        users.get(use: read)
-        users.put(use: update)
-        users.delete(use: delete)
-    }
+        //http://127.0.0.1:8080/users
 
-    func create(req: Request) async throws -> String{
-        return "new user added"
+        users.get(use: index)
+        users.post(use: post)
     }
-
+    
     //read
-    func read(req: Request) async throws -> String{
-        return "user = shahad"
+    func index( req:Request) async throws -> [Users] {
+        return try await Users.query(on:req.db).all()
     }
-
-    //update
-    func update(req: Request) async throws -> String{
-        return "users new DoB is= 27/1/2003"
+    //create
+    func post(req: Request) async throws -> Users {
+        let newUser = try req.content.decode(Users.self)
+        try await newUser.create(on: req.db)
+        return newUser
     }
-
-    //delet
-    func delete (req: Request) async throws -> String{
-        return "user been deleted"
-    }
-
-
+    
 }
 

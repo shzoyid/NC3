@@ -12,33 +12,50 @@ import Vapor
 struct AttendenceController: RouteCollection {
     func boot(routes: Vapor.RoutesBuilder) throws {
         
-        let Attendene = routes.grouped("attendence")
+        let attendances = routes.grouped("attendances")
         
-        Attendene.post(use: create)
-        Attendene.get(use: read)
-        Attendene.put(use: update)
+        attendances.post(use: post)
+        attendances.get(use: index)
+        attendances.put(use: update)
         //http://127.0.0.1:8080/attendence/1234567890
-        Attendene.delete(":id", use: delete)
-    }
-
-    func create(req: Request) async throws -> String{
-        return "new atendence recored added"
+        attendances.delete(":id", use: delete)
     }
 
     //read
-    func read(req: Request) async throws -> String{
-        return "attendence number = 123"
+    func index( req:Request) async throws -> [Attendance] {
+        return try await Attendance.query(on:req.db).all()
     }
-
-    //update
-    func update(req: Request) async throws -> String{
-        return "update the attendence time"
+    //create
+    func post(req: Request) async throws -> Attendance {
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        let newAttendance = try req.content.decode(Attendance.self, using: decoder)
+        newAttendance.check_in
+        
+        
+        //
+        try await newAttendance.create(on: req.db)
+        return newAttendance
     }
-
-    //delet
-    func delete (req: Request) async throws -> String{
-        let id = req.parameters.get("id", as: UUID.self)
-        return "delete attendence"
+    
+    func update(req: Request) async throws -> Attendance{
+        let newAttendance = try req.content.decode(Attendance.self)
+        guard let AttendanceInDB = try await Attendance.find(newAttendance.id, on: req.db) else {
+            throw Abort(.notFound)
+        }
+//        AttendanceInDB.DoB = newAttendance.DoB
+        try await AttendanceInDB.save(on: req.db)
+        return newAttendance
+    }
+ 
+    //delete
+    func delete (req: Request) async throws -> Users{
+        let UserID = req.parameters.get("id", as:UUID.self)
+        guard let UserInDB = try await Users.find(UserID, on: req.db) else {
+            throw Abort(.notFound)
+        }
+        try await UserInDB.delete(on:req.db)
+        return UserInDB
     }
 
 }

@@ -9,9 +9,9 @@ import Fluent
 import Vapor
 
 final class Absence: Model, Content {
-    static let schema = "absence"
+    static let schema = "absences"
     
-    @ID(key: .id)
+    @ID
     var id: UUID?
     
     @Parent(key: "user_id")
