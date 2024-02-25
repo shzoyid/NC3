@@ -17,6 +17,9 @@ final class Absence: Model, Content {
     @Parent(key: "user_id")
     var user: Users
     
+    @Field(key: "excuse")
+    var excuse: String?
+    
     
     init() { }
     
@@ -28,3 +31,4 @@ final class Absence: Model, Content {
     }
   
 }
+
