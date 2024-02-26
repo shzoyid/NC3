@@ -6,38 +6,43 @@ struct AbsenceController: RouteCollection {
         let absences = routes.grouped("absences")
         
         absences.get(use: read)
-        absences.put(":id", use: update) // Notice the ":id" parameter in the route.
+//        absences.put(":id", use: update) // Notice the ":id" parameter in the route.
         absences.delete(":id", use: delete)
+        absences.post(use: post)
+
     }
     
     // Read all absences
     func read(req: Request) async throws -> Int {
            return try await Absence.query(on: req.db).count()
        }
-
-    // Update an absence with an excuse
-    func update(req: Request) async throws -> Absence {
-        // Decode the excuse from the request's JSON body
-        let absenceUpdate = try req.content.decode(AbsenceUpdate.self)
-        
-        // Get the absence ID from the request's parameters
-        guard let absenceID = req.parameters.get("id", as: UUID.self) else {
-            throw Abort(.badRequest, reason: "Absence ID is required.")
-        }
-        
-        // Find the absence record in the database
-        guard let absenceInDB = try await Absence.find(absenceID, on: req.db) else {
-            throw Abort(.notFound, reason: "Absence record not found for the provided ID.")
-        }
-        
-        // Update the excuse property
-        absenceInDB.excuse = absenceUpdate.excuse
-        // You can add other properties to update as needed
-
-        // Save the updated absence record
-        try await absenceInDB.save(on: req.db)
-        return absenceInDB
+    
+    func post(req: Request) async throws -> Absence {
+        let newAbsence = try req.content.decode(Absence.self)
+        try await newAbsence.create(on: req.db)
+        return newAbsence
     }
+
+//    // Update an absence with an excuse
+//    func update(req: Request) async throws -> Absence {
+//        let absenceUpdate = try req.content.decode(AbsenceUpdate.self)
+//        guard let absenceID = req.parameters.get("id", as: UUID.self) else {
+//            throw Abort(.badRequest, reason: "Absence ID is required.")
+//        }
+//        
+//        // Find the absence record in the database
+//        guard let absenceInDB = try await Absence.find(absenceID, on: req.db) else {
+//            throw Abort(.notFound, reason: "Absence record not found for the provided ID.")
+//        }
+//        
+//        // Update the excuse property
+//        absenceInDB.date = absenceUpdate.date
+//        // You can add other properties to update as needed
+//
+//        // Save the updated absence record
+//        try await absenceInDB.save(on: req.db)
+//        return absenceInDB
+//    }
     
   func delete(req: Request) async throws -> HTTPStatus {
         guard let absenceID = req.parameters.get("id", as: UUID.self) else {

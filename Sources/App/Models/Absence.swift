@@ -17,15 +17,16 @@ final class Absence: Model, Content {
     @Parent(key: "user_id")
     var user: Users
     
-    @Field(key: "excuse")
-    var excuse: String?
+    @Field(key: "date")
+    var date: Date?
     
     
     init() { }
-    
-    init(id: UUID? = nil, user_id: Users.IDValue) {
+    init(id: UUID? = nil, user_id: Users.IDValue, date: Date) {
         self.id = id
         self.$user.id = user_id
+        self.date = date
+        
         
 
     }

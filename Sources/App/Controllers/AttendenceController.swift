@@ -19,32 +19,46 @@ struct AttendenceController: RouteCollection {
     }
     //create
     //create
-      func post(req: Request) async throws -> Attendance {
-          let decoder = JSONDecoder()
-          decoder.dateDecodingStrategy = .iso8601
-          let newAttendance = try req.content.decode(Attendance.self, using: decoder)
-          
-          let checkInTime = newAttendance.check_in
-          let lateThreshold = Calendar.current.date(bySettingHour: 14, minute: 15, second: 0, of: checkInTime)!
-          
-          // Check if check-in is late
-          if checkInTime > lateThreshold {
-              let lateMinutes = Calendar.current.dateComponents([.minute], from: lateThreshold, to: checkInTime).minute ?? 0
-              newAttendance.early_late_min = lateMinutes
-          }
+    func post(req: Request) async throws -> Attendance {
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        let newAttendance = try req.content.decode(Attendance.self, using: decoder)
 
-          // Check if there's no check-out time and the current time is past 6 PM
-          let now = Date()
-          let endOfWorkDay = Calendar.current.date(bySettingHour: 18, minute: 0, second: 0, of: now)!
-          if newAttendance.check_out == nil && now > endOfWorkDay {
-              // Assuming that the Absence model has an initializer that takes a user ID
-              let absence = Absence(user_id: newAttendance.$user.id)
-              try await absence.create(on: req.db)
-          }
+        let checkInTime = newAttendance.check_in
+        let lateThreshold = Calendar.current.date(bySettingHour: 14, minute: 15, second: 0, of: checkInTime)!
 
-          try await newAttendance.create(on: req.db)
-          return newAttendance
-      }
+        // Check if check-in is late
+        if checkInTime > lateThreshold {
+            let lateMinutes = Calendar.current.dateComponents([.minute], from: lateThreshold, to: checkInTime).minute ?? 0
+            newAttendance.early_late_min = lateMinutes
+        }
+
+        // Check if there's no check-out time and the current time is past 6 PM
+        let now = Date()
+        let endOfWorkDay = Calendar.current.date(bySettingHour: 18, minute: 0, second: 0, of: now)!
+        if newAttendance.check_out == nil && now > endOfWorkDay {
+            let absence = Absence(user_id: newAttendance.$user.id, date: Calendar.current.date(bySettingHour: 18, minute: 0, second: 0, of: now)!)
+            try await absence.create(on: req.db)
+        }
+
+        try await newAttendance.create(on: req.db)
+
+        // Check if the user has accumulated 240 or more late minutes
+        let userId = try newAttendance.$user.id
+        let attendances = try await Attendance.query(on: req.db).all()
+        let userAttendances = attendances.filter { $0.$user.id == userId }
+
+        let totalLateMinutes = userAttendances.reduce(0) { $0 + ($1.early_late_min ?? 0) }
+
+        if newAttendance.early_late_min ?? 0 >= 240 || totalLateMinutes >= 240 {
+            let absence = Absence(user_id: userId, date: Calendar.current.date(bySettingHour: 18, minute: 0, second: 0, of: now)!)
+            try await absence.create(on: req.db)
+        }
+
+        return newAttendance
+    }
+
+
     
     func update(req: Request) async throws -> Attendance{
         let newAttendance = try req.content.decode(Attendance.self)
